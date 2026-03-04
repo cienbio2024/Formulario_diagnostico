@@ -31,7 +31,8 @@ app.post('/api/diagnostico', async (req, res) => {
     if (!response.ok) {
       return res.status(response.status).json({ error: data.error?.message || 'Error en la API' });
     }
-
+    console.log('Respuesta Gemini:', JSON.stringify(data));
+    
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     res.json({ text });
 
