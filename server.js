@@ -15,25 +15,28 @@ app.post('/api/diagnostico', async (req, res) => {
   }
 
   try {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
-
-    const response = await fetch(url, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('Error Anthropic:', JSON.stringify(data));
       return res.status(response.status).json({ error: data.error?.message || 'Error en la API' });
     }
-    console.log('Respuesta Gemini:', JSON.stringify(data));
-    
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
     res.json({ text });
 
   } catch (error) {
