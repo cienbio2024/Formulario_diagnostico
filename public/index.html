@@ -12,16 +12,16 @@
     --fondo: #F7FAFB; --texto: #1a2332; --error: #e53935;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--fondo); color: var(--texto); min-height: 100vh; }
+  body { font-family: 'DM Sans', sans-serif; background: transparent; color: var(--texto); min-height: 100vh; }
 
-  .header { background: var(--azul-osc); padding: 18px 32px; display: flex; align-items: center; gap: 14px; }
+  .header { display: none; }
   .logo-mark { width: 42px; height: 42px; background: var(--acento); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; color: white; }
   .logo-name { color: white; font-weight: 700; font-size: 17px; letter-spacing: 1px; }
   .logo-sub { color: rgba(255,255,255,0.5); font-size: 11px; }
 
-  .container { max-width: 740px; margin: 0 auto; padding: 40px 20px 80px; }
+  .container { max-width: 100%; margin: 0 auto; padding: 20px 16px 60px; }
 
-  .hero { text-align: center; margin-bottom: 40px; }
+  .hero { text-align: center; margin-bottom: 24px; }
   .hero-tag { display: inline-block; background: var(--azul-cl); color: var(--azul); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 16px; }
   .hero h1 { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--azul-osc); line-height: 1.2; margin-bottom: 12px; }
   .hero h1 em { color: var(--acento); font-style: italic; }
@@ -438,7 +438,6 @@ INSTRUCCIONES:
 7. 3 a 5 párrafos. Escribe en español.`;
 
   try {
-    console.log('Enviando prompt:', prompt.substring(0, 100));
     const res = await fetch('/api/diagnostico', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -476,7 +475,6 @@ function typewrite(text) {
 }
 
 updateUrgency(document.getElementById('urgencia'));
-window.onload = () => { window.scrollTo(0,0); }
 </script>
 </body>
 </html>
