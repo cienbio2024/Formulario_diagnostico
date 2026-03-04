@@ -438,6 +438,7 @@ INSTRUCCIONES:
 7. 3 a 5 párrafos. Escribe en español.`;
 
   try {
+    console.log('Enviando prompt:', prompt.substring(0, 100));
     const res = await fetch('/api/diagnostico', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
