@@ -475,8 +475,13 @@ function typewrite(text) {
 }
 
 updateUrgency(document.getElementById('urgencia'));
+
+// Siempre mostrar paso 1 al cargar
 document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
 document.getElementById('step1').classList.add('active');
+document.getElementById('aiResult').classList.remove('active');
+document.getElementById('loadingState').classList.remove('active');
+document.getElementById('progressWrap').style.display = 'block';
 </script>
 </body>
 </html>
