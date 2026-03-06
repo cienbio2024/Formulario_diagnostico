@@ -475,10 +475,8 @@ function typewrite(text) {
 }
 
 updateUrgency(document.getElementById('urgencia'));
-document.getElementById('aiResult').style.display = 'none';
-document.getElementById('loadingState').style.display = 'none';
+document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
 document.getElementById('step1').classList.add('active');
-document.getElementById('progressWrap').style.display = 'block';
 </script>
 </body>
 </html>
