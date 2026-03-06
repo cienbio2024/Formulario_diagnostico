@@ -50,7 +50,7 @@ async function enviarEmail(datos, diagnostico) {
       body: JSON.stringify({
         from: 'CIENBIO <onboarding@resend.dev>',
         to: ['augustomanubens@gmail.com'],
-        subject: `Nueva consulta CIENBIO: ${datos.nombre} — ${datos.org}`,
+       subject: `Nueva consulta CIENBIO: ${datos.nombre} | ${datos.email} | ${datos.tel || 'sin tel'} — ${datos.org}`,
         html
       })
     });
