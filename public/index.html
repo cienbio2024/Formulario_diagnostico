@@ -441,7 +441,7 @@ INSTRUCCIONES:
     const res = await fetch('/api/diagnostico', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ prompt, datos })
     });
     const result = await res.json();
     const text = result.text || 'No se pudo generar el diagnóstico. Por favor contáctanos directamente.';
