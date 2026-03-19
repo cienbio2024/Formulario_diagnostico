@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico CIENBIO</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #1B5E8E; --azul-osc: #0f3a58; --azul-cl: #D0E4F2;
+    --acento: #00C9A7; --gris: #6b7a8d; --borde: #dde5ee;
+    --fondo: #F7FAFB; --texto: #1a2332; --error: #e53935;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--fondo); color: var(--texto); min-height: 100vh; }
+
+  .header { background: var(--azul-osc); padding: 18px 32px; display: flex; align-items: center; gap: 14px; }
+  .logo-mark { width: 42px; height: 42px; background: var(--acento); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; color: white; }
+  .logo-name { color: white; font-weight: 700; font-size: 17px; letter-spacing: 1px; }
+  .logo-sub { color: rgba(255,255,255,0.5); font-size: 11px; }
+
+  .container { max-width: 740px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  .hero { text-align: center; margin-bottom: 40px; }
+  .hero-tag { display: inline-block; background: var(--azul-cl); color: var(--azul); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 5px 16px; border-radius: 20px; margin-bottom: 16px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--azul-osc); line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 em { color: var(--acento); font-style: italic; }
+  .hero p { color: var(--gris); font-size: 15px; line-height: 1.7; max-width: 500px; margin: 0 auto; }
+
+  .progress-wrap { margin-bottom: 32px; }
+  .progress-labels { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .progress-label { font-size: 12px; font-weight: 600; color: var(--gris); text-transform: uppercase; letter-spacing: 0.5px; }
+  .progress-pct { font-size: 12px; font-weight: 600; color: var(--azul); }
+  .progress-bar { height: 4px; background: var(--borde); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--azul), var(--acento)); border-radius: 2px; transition: width 0.5s ease; }
+
+  .card { background: white; border-radius: 20px; border: 1px solid var(--borde); box-shadow: 0 4px 24px rgba(27,94,142,0.07); padding: 36px 40px; }
+
+  .step { display: none; }
+  .step.active { display: block; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .step-icon { font-size: 32px; margin-bottom: 16px; }
+  .step h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--azul-osc); margin-bottom: 6px; }
+  .step-desc { color: var(--gris); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+  .field { margin-bottom: 18px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px){ .field-row { grid-template-columns: 1fr; } .card { padding: 24px 20px; } }
+
+  label.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--texto); margin-bottom: 6px; }
+  label.field-label .req { color: var(--acento); }
+
+  input, select, textarea {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--borde); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--texto);
+    background: var(--fondo); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--azul); background: white; box-shadow: 0 0 0 3px rgba(27,94,142,0.1); }
+  input.invalid, select.invalid, textarea.invalid { border-color: var(--error); }
+  textarea { resize: vertical; }
+  .err { color: var(--error); font-size: 12px; margin-top: 4px; display: none; }
+  .err.show { display: block; }
+
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:500px){ .check-grid { grid-template-columns: 1fr; } }
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1.5px solid var(--borde); border-radius: 10px; cursor: pointer; background: var(--fondo); transition: all 0.15s; user-select: none; }
+  .check-item:hover { border-color: var(--azul); background: white; }
+  .check-item.sel { border-color: var(--azul); background: var(--azul-cl); }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--borde); border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; transition: all 0.15s; }
+  .check-item.sel .check-box { background: var(--azul); border-color: var(--azul); }
+  .check-text { font-size: 13px; line-height: 1.3; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { padding: 9px 18px; border: 1.5px solid var(--borde); border-radius: 40px; cursor: pointer; font-size: 13px; color: var(--gris); background: var(--fondo); transition: all 0.15s; user-select: none; }
+  .pill:hover { border-color: var(--azul); color: var(--azul); background: white; }
+  .pill.sel { background: var(--azul); border-color: var(--azul); color: white; font-weight: 600; }
+
+  .range-wrap { padding: 4px 0; }
+  input[type="range"] { width: 100%; accent-color: var(--azul); cursor: pointer; }
+  .range-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--gris); margin-top: 4px; }
+  .range-val { text-align: center; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--azul); }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--borde); }
+  .btn { padding: 12px 26px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: var(--azul); color: white; box-shadow: 0 4px 14px rgba(27,94,142,0.25); }
+  .btn-primary:hover { background: var(--azul-osc); transform: translateY(-1px); }
+  .btn-gradient { background: linear-gradient(135deg, var(--azul), var(--acento)); color: white; box-shadow: 0 4px 16px rgba(27,94,142,0.3); }
+  .btn-secondary { background: transparent; color: var(--gris); border: 1.5px solid var(--borde); }
+  .btn-secondary:hover { background: var(--fondo); color: var(--texto); }
+
+  /* Loading */
+  #loadingState { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; }
+  #loadingState.active { display: flex; }
+  .spinner { width: 50px; height: 50px; border: 3px solid var(--azul-cl); border-top-color: var(--azul); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loadingState strong { font-size: 18px; color: var(--azul-osc); margin-bottom: 8px; }
+  #loadingState p { color: var(--gris); font-size: 14px; line-height: 1.6; }
+
+  /* Result */
+  #aiResult { display: none; }
+  #aiResult.active { display: block; animation: fadeUp 0.5s ease both; }
+  .ai-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--borde); }
+  .ai-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, var(--azul), var(--acento)); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .ai-meta strong { display: block; font-size: 16px; color: var(--azul-osc); margin-bottom: 2px; }
+  .ai-meta span { font-size: 12px; color: var(--gris); }
+  .ai-tag { display: inline-block; background: var(--azul-cl); color: var(--azul); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; }
+  #aiContent { font-size: 15px; line-height: 1.85; color: var(--texto); white-space: pre-wrap; margin-bottom: 32px; }
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--azul); animation: blink 0.7s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .ai-cta { background: linear-gradient(135deg, var(--azul-osc), var(--azul)); border-radius: 14px; padding: 24px 28px; text-align: center; color: white; }
+  .ai-cta strong { display: block; font-size: 18px; margin-bottom: 6px; }
+  .ai-cta p { font-size: 14px; opacity: 0.8; margin-bottom: 12px; }
+  .ai-cta a { color: var(--acento); text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mark">C</div>
+  <div>
+    <div class="logo-name">CIENBIO</div>
+    <div class="logo-sub">Biotecnología · Diagnóstico Molecular</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-tag">Consulta Diagnóstica Gratuita</div>
+    <h1>Cuéntanos tu desafío <em>científico</em></h1>
+    <p>Responde las preguntas a continuación y nuestra IA analizará tu situación para entregarte una orientación personalizada.</p>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-labels">
+      <span class="progress-label" id="progressLabel">Paso 1 de 3</span>
+      <span class="progress-pct" id="progressPct">33%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+  </div>
+
+  <div class="card" id="mainCard">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <div class="step-icon">👤</div>
+      <h2>Datos de contacto</h2>
+      <p class="step-desc">Información básica para personalizar tu diagnóstico.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Nombre completo <span class="req">*</span></label>
+          <input type="text" id="nombre" placeholder="Dr. Juan Pérez">
+          <div class="err" id="err-nombre">Requerido</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Cargo / Rol <span class="req">*</span></label>
+          <input type="text" id="cargo" placeholder="Director de Laboratorio">
+          <div class="err" id="err-cargo">Requerido</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Organización <span class="req">*</span></label>
+        <input type="text" id="org" placeholder="Nombre de la empresa o institución">
+        <div class="err" id="err-org">Requerido</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="juan@empresa.cl">
+          <div class="err" id="err-email">Correo inválido</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Teléfono / WhatsApp</label>
+          <input type="tel" id="tel" placeholder="+56 9 xxxx xxxx">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Tipo de organización <span class="req">*</span></label>
+        <select id="tipoOrg">
+          <option value="">Selecciona una opción…</option>
+          <option>Empresa acuícola / pesquera</option>
+          <option>Laboratorio clínico o veterinario</option>
+          <option>Universidad o centro de investigación</option>
+          <option>Empresa agroindustrial / alimentos</option>
+          <option>Startup biotecnológica</option>
+          <option>Organismo público o regulatorio</option>
+          <option>Otra</option>
+        </select>
+        <div class="err" id="err-tipoOrg">Requerido</div>
+      </div>
+
+      <div class="nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="nextStep(1)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <div class="step-icon">🔬</div>
+      <h2>Tu desafío científico</h2>
+      <p class="step-desc">Describe la situación que quieres resolver. No necesitas términos técnicos.</p>
+
+      <div class="field">
+        <label class="field-label">¿Cuál es tu principal necesidad? <span class="req">*</span></label>
+        <select id="tipoProblema">
+          <option value="">Selecciona una categoría…</option>
+          <option>Resultados inconsistentes o no reproducibles en el laboratorio</option>
+          <option>Datos moleculares sin analizar o sin interpretar</option>
+          <option>Quiero postular a un fondo de innovación (CORFO, ANID, FIA u otro)</option>
+          <option>Necesito implementar una nueva técnica diagnóstica</option>
+          <option>Mi equipo necesita capacitación en técnicas moleculares</option>
+          <option>Requiero certificación o validación de un proceso</option>
+          <option>Otro desafío</option>
+        </select>
+        <div class="err" id="err-tipoProblema">Requerido</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Descríbelo en detalle <span class="req">*</span></label>
+        <textarea id="descripcion" rows="4" placeholder="Ej: Realizamos PCR para detección de patógenos en salmón, pero los resultados varían entre corridas sin causa aparente…"></textarea>
+        <div class="err" id="err-descripcion">Describe con más detalle (mínimo 20 caracteres)</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">¿Qué resultado esperas obtener?</label>
+        <textarea id="expectativa" rows="2" placeholder="Ej: Un protocolo estandarizado y equipo capacitado en 2 meses…"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Nivel de urgencia</label>
+        <div class="range-wrap">
+          <input type="range" id="urgencia" min="1" max="5" value="3" oninput="updateUrgency(this)">
+          <div class="range-labels"><span>Sin urgencia</span><span>Moderado</span><span>Crítico</span></div>
+          <div class="range-val" id="urgVal">Moderado — puedo esperar algunas semanas</div>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn-secondary" onclick="prevStep(2)">← Volver</button>
+        <button class="btn btn-primary" onclick="nextStep(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <div class="step-icon">⚗️</div>
+      <h2>Técnicas y contexto</h2>
+      <p class="step-desc">Esto nos permite orientarte con mayor precisión.</p>
+
+      <div class="field">
+        <label class="field-label">¿Qué técnicas moleculares utilizan? (Selecciona todas las que apliquen)</label>
+        <div class="check-grid" id="tecnicasGrid">
+          <!-- generado por JS -->
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:20px;">
+        <label class="field-label">¿Han trabajado antes con consultores externos?</label>
+        <div class="pills" id="expPills">
+          <div class="pill" onclick="selPill(this,'expPills')">Nunca</div>
+          <div class="pill" onclick="selPill(this,'expPills')">Sí, con buenos resultados</div>
+          <div class="pill" onclick="selPill(this,'expPills')">Sí, sin buenos resultados</div>
+          <div class="pill" onclick="selPill(this,'expPills')">Evaluando opciones</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">¿Algún contexto adicional?</label>
+        <textarea id="adicional" rows="3" placeholder="Plazos, restricciones, presupuesto aproximado, normativas que deben cumplir…"></textarea>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn-secondary" onclick="prevStep(3)">← Volver</button>
+        <button class="btn btn-gradient" onclick="submitForm()">🔍 Obtener diagnóstico</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState">
+      <div class="spinner"></div>
+      <strong>Analizando tu situación…</strong>
+      <p>Nuestro sistema está procesando tus respuestas<br>y preparando una orientación personalizada.</p>
+    </div>
+
+    <!-- Result -->
+    <div id="aiResult">
+      <div class="ai-header">
+        <div class="ai-avatar">🧬</div>
+        <div class="ai-meta">
+          <strong>Diagnóstico Preliminar CIENBIO</strong>
+          <span>Generado por IA · Revisado por equipo científico</span>
+        </div>
+      </div>
+      <div class="ai-tag" id="aiTag">Diagnóstico Personalizado</div>
+      <div id="aiContent"></div>
+      <div class="ai-cta" id="aiCta" style="display:none;">
+        <strong>¿Listo para el siguiente paso?</strong>
+        <p>Agenda una consulta diagnóstica gratuita de 1 hora con nuestro equipo.</p>
+        <a href="mailto:contacto@cienbio.cl">contacto@cienbio.cl</a> &nbsp;·&nbsp;
+        <a href="tel:+56999916023">+569 9991 6023</a> &nbsp;·&nbsp;
+        <a href="https://www.cienbio.cl" target="_blank">www.cienbio.cl</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const URGENCY = ["","Sin urgencia — tengo tiempo para planificar","Baja — puedo esperar algunos meses","Moderado — puedo esperar algunas semanas","Alta — necesito solución en las próximas semanas","Crítico — el problema está afectando operaciones ahora"];
+const TECNICAS = ["PCR convencional","qPCR / RT-PCR","Secuenciación NGS","Secuenciación Sanger","CRISPR / diagnóstico CRISPR","Electroforesis / Western Blot","Análisis bioinformático","Cultivo celular / microbiológico","ELISA / inmunoensayos","Ninguna aún (en etapa inicial)"];
+let selectedTecnicas = [];
+
+// Build tecnicas checkboxes
+const grid = document.getElementById('tecnicasGrid');
+TECNICAS.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'check-item';
+  el.innerHTML = `<div class="check-box"></div><span class="check-text">${t}</span>`;
+  el.onclick = () => {
+    el.classList.toggle('sel');
+    if (el.classList.contains('sel')) { selectedTecnicas.push(t); el.querySelector('.check-box').textContent='✓'; }
+    else { selectedTecnicas = selectedTecnicas.filter(x=>x!==t); el.querySelector('.check-box').textContent=''; }
+  };
+  grid.appendChild(el);
+});
+
+function updateUrgency(el) {
+  document.getElementById('urgVal').textContent = URGENCY[el.value];
+}
+
+function selPill(el, groupId) {
+  document.querySelectorAll(`#${groupId} .pill`).forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function validate(n) {
+  let ok = true;
+  if (n===1) {
+    [['nombre','nombre'],['cargo','cargo'],['org','org'],['email','email'],['tipoOrg','tipoOrg']].forEach(([id,err]) => {
+      const el = document.getElementById(id);
+      const errEl = document.getElementById('err-'+err);
+      const empty = !el.value.trim();
+      const badEmail = id==='email' && el.value && !el.value.includes('@');
+      if (empty || badEmail) { el.classList.add('invalid'); errEl.classList.add('show'); ok=false; }
+      else { el.classList.remove('invalid'); errEl.classList.remove('show'); }
+    });
+  }
+  if (n===2) {
+    const tp = document.getElementById('tipoProblema');
+    const desc = document.getElementById('descripcion');
+    if (!tp.value) { tp.classList.add('invalid'); document.getElementById('err-tipoProblema').classList.add('show'); ok=false; }
+    else { tp.classList.remove('invalid'); document.getElementById('err-tipoProblema').classList.remove('show'); }
+    if (desc.value.trim().length < 20) { desc.classList.add('invalid'); document.getElementById('err-descripcion').classList.add('show'); ok=false; }
+    else { desc.classList.remove('invalid'); document.getElementById('err-descripcion').classList.remove('show'); }
+  }
+  return ok;
+}
+
+function nextStep(n) {
+  if (!validate(n)) return;
+  document.getElementById('step'+n).classList.remove('active');
+  document.getElementById('step'+(n+1)).classList.add('active');
+  updateProgress(n+1);
+  window.scrollTo(0,0);
+}
+
+function prevStep(n) {
+  document.getElementById('step'+n).classList.remove('active');
+  document.getElementById('step'+(n-1)).classList.add('active');
+  updateProgress(n-1);
+  window.scrollTo(0,0);
+}
+
+function updateProgress(n) {
+  const pct = Math.round((n/3)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = `Paso ${n} de 3`;
+  document.getElementById('progressPct').textContent = pct+'%';
+}
+
+async function submitForm() {
+  if (!validate(2)) return;
+
+  const expPill = document.querySelector('#expPills .pill.sel');
+  const urgVal = document.getElementById('urgencia').value;
+  const data = {
+    nombre: document.getElementById('nombre').value,
+    cargo: document.getElementById('cargo').value,
+    org: document.getElementById('org').value,
+    tipoOrg: document.getElementById('tipoOrg').value,
+    tipoProblema: document.getElementById('tipoProblema').value,
+    descripcion: document.getElementById('descripcion').value,
+    expectativa: document.getElementById('expectativa').value,
+    urgencia: URGENCY[urgVal],
+    tecnicas: selectedTecnicas.length ? selectedTecnicas.join(', ') : 'No especificadas',
+    experiencia: expPill ? expPill.textContent : 'No especificada',
+    adicional: document.getElementById('adicional').value
+  };
+
+  // Set tag
+  const tagMap = {'Resultados inconsistentes':'Optimización de Protocolos','Datos moleculares':'Análisis Bioinformático','postular':'Desarrollo de Proyectos I+D','capacitación':'Capacitación Molecular','certificación':'Validación y Certificación'};
+  let tag = 'Diagnóstico Personalizado';
+  for (const [k,v] of Object.entries(tagMap)) { if (data.tipoProblema.toLowerCase().includes(k.toLowerCase())) { tag=v; break; } }
+  document.getElementById('aiTag').textContent = tag;
+
+  // Hide steps, show loading
+  document.getElementById('step3').classList.remove('active');
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('loadingState').classList.add('active');
+
+  const prompt = `Eres el equipo científico de CIENBIO SpA, empresa chilena de biotecnología con más de 25 años de experiencia en biología molecular, genómica, diagnóstico molecular y bioinformática. Entrega un diagnóstico preliminar personalizado a este potencial cliente.
+
+DATOS:
+- Nombre: ${data.nombre} | Cargo: ${data.cargo} | Organización: ${data.org} | Tipo: ${data.tipoOrg}
+- Problema: ${data.tipoProblema}
+- Descripción: ${data.descripcion}
+- Resultado esperado: ${data.expectativa || 'No especificado'}
+- Urgencia: ${data.urgencia}
+- Técnicas que usan: ${data.tecnicas}
+- Experiencia con consultores: ${data.experiencia}
+- Contexto adicional: ${data.adicional || 'Ninguno'}
+
+INSTRUCCIONES:
+1. Saluda brevemente por nombre y organización.
+2. Demuestra que entiendes su problema con precisión.
+3. Entrega orientación diagnóstica preliminar: posibles causas o factores, sin comprometerte a resultados garantizados.
+4. Recomienda 1 o 2 servicios CIENBIO que más aplican:
+   - Servicio 01: Consultoría (auditoría de protocolos, optimización, capacitación)
+   - Servicio 02: Análisis de Datos y Bioinformática
+   - Servicio 03: Desarrollo de Proyectos I+D (postulación CORFO/ANID/FIA)
+5. Cierra invitando a una consulta diagnóstica gratuita de 1 hora.
+6. Tono: profesional, cálido, riguroso. Sin markdown. Sin asteriscos.
+7. 3 a 5 párrafos. Escribe en español.`;
+
+  try {
+    const res = await fetch('/api/diagnostico', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const result = await res.json();
+    const text = result.text || 'No se pudo generar el diagnóstico. Por favor contáctanos directamente.';
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('aiResult').classList.add('active');
+    typewrite(text);
+  } catch {
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('aiResult').classList.add('active');
+    document.getElementById('aiContent').textContent = 'Hubo un error al conectar. Por favor contáctanos a contacto@cienbio.cl o al +569 9991 6023.';
+    document.getElementById('aiCta').style.display = 'block';
+  }
+}
+
+function typewrite(text) {
+  const el = document.getElementById('aiContent');
+  el.innerHTML = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  el.appendChild(cursor);
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i < text.length) {
+      cursor.before(document.createTextNode(text[i++]));
+    } else {
+      clearInterval(iv);
+      cursor.remove();
+      document.getElementById('aiCta').style.display = 'block';
+    }
+  }, 16);
+}
+
+updateUrgency(document.getElementById('urgencia'));
+</script>
+</body>
+</html>
